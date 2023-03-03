@@ -11,7 +11,7 @@ for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
 tf.config.list_physical_devices('GPU')
 
-data_dir = '/Users/shahafbenshushan/PycharmProjects/pythonProject2/Marvel_Sanp/data'
+data_dir = 'Marvel_Sanp/data'
 image_format = ['jpeg', 'jpg', 'bmp', 'png']
 image_classes = []
 
@@ -20,18 +20,18 @@ for image_class in os.listdir(data_dir):
         continue
     image_classes.append(image_class)
 
-    # for image in os.listdir(os.path.join(data_dir,image_class)):
-    #     image_path = os.path.join(data_dir, image_class, image)
-    #
-    #     try:
-    #         img = cv2.imread(image_path)
-    #         tip = imghdr.what(image_path)
-    #
-    #         if tip not in image_format:
-    #             print('Could Not Use Image ', image_path)
-    #             os.remove(image_path)
-    #     except Exception as e:
-    #         print(' Problem with Image ', image_path, '\n', e)
+    for image in os.listdir(os.path.join(data_dir,image_class)):
+        image_path = os.path.join(data_dir, image_class, image)
+
+        try:
+            img = cv2.imread(image_path)
+            tip = imghdr.what(image_path)
+
+            if tip not in image_format:
+                print('Could Not Use Image ', image_path)
+                os.remove(image_path)
+        except Exception as e:
+            print(' Problem with Image ', image_path, '\n', e)
 
 data = tf.keras.utils.image_dataset_from_directory(data_dir,
                                                    labels='inferred',
@@ -57,12 +57,12 @@ class_names = data.class_names
 
 
 # Scale Data
-data = data.map(lambda x,y: (x/255, y))
+data = data.map(lambda x, y: (x/255, y))
 
 # Split Data
 train_size = int(len(data)*.7)
 val_size = int(len(data)*.2)
-test_size = int(len(data)*.1) + 2
+test_size = int(len(data)*.1) + 1
 
 train = data.take(train_size)
 val = data.skip(train_size).take(val_size)
@@ -86,10 +86,13 @@ print(model.summary())
 
 # Train Model
 
-log_dir = '/Users/shahafbenshushan/PycharmProjects/pythonProject2/Marvel_Sanp/Logs/'
+log_dir = 'Marvel_Sanp/Logs/'
 
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
 hist = model.fit(train, epochs=20, validation_data=val, callbacks=[tensorboard_callback])
+# Save the Model
+model.save(os.path.join('Marvel_Sanp/models',
+                        'image_classifier_num_1.h5'))
 
 # Plot Performance
 fig = plt.figure()
@@ -97,14 +100,14 @@ plt.plot(hist.history['loss'], color='teal', label='loss')
 plt.plot(hist.history['val_loss'], color='orange', label='val_loss')
 fig.suptitle('Loss', fontsize=20)
 plt.legend(loc="upper left")
-plt.savefig('/Users/shahafbenshushan/PycharmProjects/pythonProject2/Marvel_Sanp/plot_files/loss_val_loss.png')
+plt.savefig('Marvel_Sanp/plot_files/loss_val_loss.png')
 
 fig = plt.figure()
 plt.plot(hist.history['accuracy'], color='teal', label='accuracy')
 plt.plot(hist.history['val_accuracy'], color='orange', label='val_accuracy')
 fig.suptitle('Accuracy', fontsize=20)
 plt.legend(loc="upper left")
-plt.savefig('/Users/shahafbenshushan/PycharmProjects/pythonProject2/Marvel_Sanp/plot_files/accuracy_val_accuracy.png')
+plt.savefig('Marvel_Sanp/plot_files/accuracy_val_accuracy.png')
 
 # Evaluate
 precision = tf.keras.metrics.Precision()
@@ -120,8 +123,6 @@ for batch in test.as_numpy_iterator():
 
 print(f'precision={precision.result()} \n recall={recall.result()} \n accuracy={accuracy.result()}')
 
-# Save the Model
-model.save(os.path.join('/Users/shahafbenshushan/PycharmProjects/pythonProject2/Marvel_Sanp/models',
-                        'image_classifier_num_1.h5'))
+
 
 
