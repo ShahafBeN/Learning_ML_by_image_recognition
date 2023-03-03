@@ -39,7 +39,7 @@ data = tf.keras.utils.image_dataset_from_directory(data_dir,
                                                    color_mode='rgb',
                                                    class_names=image_classes,
                                                    image_size=(256, 256),
-                                                   batch_size=len(image_classes)+15
+                                                   batch_size=len(image_classes)+20
                                                    )
 
 data_iterator = data.as_numpy_iterator()
@@ -89,7 +89,7 @@ print(model.summary())
 log_dir = 'Marvel_Sanp/Logs/'
 
 tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
-hist = model.fit(train, epochs=20, validation_data=val, callbacks=[tensorboard_callback])
+hist = model.fit(train, epochs=30, validation_data=val, callbacks=[tensorboard_callback])
 # Save the Model
 model.save(os.path.join('Marvel_Sanp/models',
                         'image_classifier_num_1.h5'))
